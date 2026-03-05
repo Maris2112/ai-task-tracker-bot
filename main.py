@@ -12,16 +12,25 @@ BASE_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 # === Database ===
 DB_NAME = "tasks.db"
+
+
 def init_db():
+    """Initialize the tasks database if it doesn't exist."""
     with sqlite3.connect(DB_NAME) as conn:
         c = conn.cursor()
-        c.execute("""CREATE TABLE IF NOT EXISTS tasks (
+        c.execute(
+            """CREATE TABLE IF NOT EXISTS tasks (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         user_id TEXT,
                         text TEXT,
                         done BOOLEAN DEFAULT 0
-                    )""")
+                    )"""
+        )
         conn.commit()
+
+
+# Initialize database when module is imported so apps run via WSGI also work
+init_db()
 
 # === Handlers ===
 def handle_start(chat_id):
@@ -58,5 +67,4 @@ def webhook():
     return {"ok": True}
 
 if __name__ == "__main__":
-    init_db()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
